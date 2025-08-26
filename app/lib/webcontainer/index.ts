@@ -24,8 +24,19 @@ if (!import.meta.env.SSR) {
       .then(() => {
         return WebContainer.boot({ workdirName: WORK_DIR_NAME });
       })
-      .then((webcontainer) => {
+      .then(async (webcontainer) => {
         webcontainerContext.loaded = true;
+
+        try {
+          const process = await webcontainer.spawn('jsh', [
+            '-c',
+            'test -f package.json || npx --yes degit thegarrettscott/superhuman-plus .',
+          ]);
+          await process.exit;
+        } catch (error) {
+          console.error('Failed to initialize project', error);
+        }
+
         return webcontainer;
       });
 
